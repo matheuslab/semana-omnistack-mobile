@@ -13,23 +13,35 @@ const navigateToDetail = (navigation, incident) => () => {
     navigation.navigate('Detail', { incident });
 }
 
-const loadIncidents = (setIncidents, setTotal, setLoading, loading, setPage, page, total, incidents) => async () => {
+const loadIncidents = async ({
+    setIncidents, 
+    incidents, 
+    setTotal, 
+    total, 
+    setLoading, 
+    loading, 
+    setPage, 
+    page}) => {
     if(loading){
+        console.log('caiu no loading');
         return;
     }
 
-    if(total > 0 && incidents.length === total){
+    if(total > 0 && incidents.length == total){
+        console.log('caiu no segundo if');
         return;
     }
 
     setLoading(true);
+
+    console.log("chegou ate aqui", total, incidents.length, total == incidents.length);
     
     const response = await api.get('incidents', {
         params: { page }
     });
 
     setIncidents([...incidents, ...response.data]);
-    setTotal(response.headers['X-Total-Count']);
+    setTotal(response.headers['x-total-count']);
     setLoading(false);
     setPage(page + 1);
 }
@@ -40,9 +52,21 @@ export const Incidents = () => {
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
+
+    const incidentData = {
+        setIncidents, 
+        incidents, 
+        setTotal, 
+        total, 
+        setLoading, 
+        loading, 
+        setPage, 
+        page
+    };
     
     useEffect(() => {
-        loadIncidents(setIncidents, setTotal, setLoading, loading, setPage, page, total, incidents);
+        loadIncidents(incidentData);
+        console.log('iniciou');
     }, []);
 
     return (
@@ -58,11 +82,11 @@ export const Incidents = () => {
             <Text style={styles.description}>Escolha um dos casos abaixo e salve o dia </Text>
 
             <FlatList 
-                data={[1]}
+                data={incidents}
                 style={styles.incidentList}
                 keyExtractor={incident => String(incident.id)}
                 showsVerticalScrollIndicator={false}
-                onEndReached={loadIncidents(setIncidents, setTotal, setLoading, loading, setPage, page, total, incidents)}
+                onEndReached={() => loadIncidents(incidentData)}
                 onEndReachedThreshold={0.2}
                 renderItem={({ item: incident }) => (
                     <View style={styles.incident}>
@@ -82,8 +106,8 @@ export const Incidents = () => {
                         </Text>
 
                         <TouchableOpacity 
-                        style={styles.detailsButton} 
-                        onPress={navigateToDetail(navigation, incident)}
+                            style={styles.detailsButton} 
+                            onPress={navigateToDetail(navigation, incident)}
                         >
                             <Text style={styles.detailsButtonText}>Ver mais detalhes</Text>
                             <Feather name="arrow-right" size={16} color="#E02041"/>
