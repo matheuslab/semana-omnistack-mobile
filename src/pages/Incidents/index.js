@@ -5,34 +5,9 @@ import { useNavigation } from '@react-navigation/native';
 
 import styles from './styles';
 
-import api from '../../services/api';
+import { loadIncidents, navigateToDetail } from './functions';
 
 import logoImg from '../../assets/logo.png';
-
-const navigateToDetail = (navigation, incident) => () => {
-    navigation.navigate('Detail', { incident });
-}
-
-const loadIncidents = (setIncidents, setTotal, setLoading, loading, setPage, page, total, incidents) => async () => {
-    if(loading){
-        return;
-    }
-
-    if(total > 0 && incidents.length === total){
-        return;
-    }
-
-    setLoading(true);
-    
-    const response = await api.get('incidents', {
-        params: { page }
-    });
-
-    setIncidents([...incidents, ...response.data]);
-    setTotal(response.headers['X-Total-Count']);
-    setLoading(false);
-    setPage(page + 1);
-}
 
 export const Incidents = () => {
     const navigation = useNavigation();
@@ -40,9 +15,20 @@ export const Incidents = () => {
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
+
+    const incidentData = {
+        setIncidents, 
+        incidents, 
+        setTotal, 
+        total, 
+        setLoading, 
+        loading, 
+        setPage, 
+        page
+    };
     
     useEffect(() => {
-        loadIncidents(setIncidents, setTotal, setLoading, loading, setPage, page, total, incidents);
+        loadIncidents(incidentData);
     }, []);
 
     return (
@@ -58,11 +44,11 @@ export const Incidents = () => {
             <Text style={styles.description}>Escolha um dos casos abaixo e salve o dia </Text>
 
             <FlatList 
-                data={[1]}
+                data={incidents}
                 style={styles.incidentList}
                 keyExtractor={incident => String(incident.id)}
                 showsVerticalScrollIndicator={false}
-                onEndReached={loadIncidents(setIncidents, setTotal, setLoading, loading, setPage, page, total, incidents)}
+                onEndReached={() => loadIncidents(incidentData)}
                 onEndReachedThreshold={0.2}
                 renderItem={({ item: incident }) => (
                     <View style={styles.incident}>
@@ -82,8 +68,8 @@ export const Incidents = () => {
                         </Text>
 
                         <TouchableOpacity 
-                        style={styles.detailsButton} 
-                        onPress={navigateToDetail(navigation, incident)}
+                            style={styles.detailsButton} 
+                            onPress={navigateToDetail(navigation, incident)}
                         >
                             <Text style={styles.detailsButtonText}>Ver mais detalhes</Text>
                             <Feather name="arrow-right" size={16} color="#E02041"/>
