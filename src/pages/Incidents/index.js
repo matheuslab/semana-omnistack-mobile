@@ -5,46 +5,9 @@ import { useNavigation } from '@react-navigation/native';
 
 import styles from './styles';
 
-import api from '../../services/api';
+import { loadIncidents, navigateToDetail } from './functions';
 
 import logoImg from '../../assets/logo.png';
-
-const navigateToDetail = (navigation, incident) => () => {
-    navigation.navigate('Detail', { incident });
-}
-
-const loadIncidents = async ({
-    setIncidents, 
-    incidents, 
-    setTotal, 
-    total, 
-    setLoading, 
-    loading, 
-    setPage, 
-    page}) => {
-    if(loading){
-        console.log('caiu no loading');
-        return;
-    }
-
-    if(total > 0 && incidents.length == total){
-        console.log('caiu no segundo if');
-        return;
-    }
-
-    setLoading(true);
-
-    console.log("chegou ate aqui", total, incidents.length, total == incidents.length);
-    
-    const response = await api.get('incidents', {
-        params: { page }
-    });
-
-    setIncidents([...incidents, ...response.data]);
-    setTotal(response.headers['x-total-count']);
-    setLoading(false);
-    setPage(page + 1);
-}
 
 export const Incidents = () => {
     const navigation = useNavigation();
@@ -66,7 +29,6 @@ export const Incidents = () => {
     
     useEffect(() => {
         loadIncidents(incidentData);
-        console.log('iniciou');
     }, []);
 
     return (

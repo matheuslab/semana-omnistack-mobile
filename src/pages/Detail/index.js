@@ -2,28 +2,13 @@ import React from 'react';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation, useRoute } from "@react-navigation/native";
 
-import { View, TouchableOpacity, Image, Text, Linking } from 'react-native';
-import * as MailComposer from 'expo-mail-composer';
+import { View, TouchableOpacity, Image, Text } from 'react-native';
+
+import { navigateBack, sendMail, sendWhatsapp } from './functions';
 
 import styles from './styles';
 
 import logoImg from '../../assets/logo.png';
-
-const navigateBack = (navigation) => () => {
-    navigation.goBack();
-}
-
-const sendMail = (message, incident) => () => {
-    MailComposer.composeAsync({
-        subject: `Herói do caso: ${incident.title}`,
-        recipients: [incident.email],
-        body: message,
-    })
-}
-
-const sendWhatsapp = (message, incident) => () => {
-    Linking.openURL(`whatsapp://send?phone=${incident.whatsapp}&text=${message}`);
-}
 
 const Detail = () => {
     const navigation = useNavigation();
